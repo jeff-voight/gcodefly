@@ -7,6 +7,9 @@ package org.voight.gcodefly.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -23,8 +26,8 @@ public class MainWindow extends JFrame {
 
     private Color backgroundColor = new Color(200, 200, 200);
     private Color foregroundColor = new Color(0, 0, 0);
-    private int preferredWidth = 800;
-    private int preferredHeight = 480;
+    private final int preferredWidth = 800;
+    private final int preferredHeight = 480;
 
     private JMenuBar mainMenuBar;
 
@@ -36,11 +39,8 @@ public class MainWindow extends JFrame {
     
     public static void main(String argv[]) {
 	/* Create and display the form */
-	java.awt.EventQueue.invokeLater(new Runnable() {
-	    @Override
-	    public void run() {
-		new MainWindow(argv).setVisible(true);
-	    }
+	java.awt.EventQueue.invokeLater(() -> {
+	    new MainWindow(argv).setVisible(true);
 	});
     }
 
@@ -48,7 +48,7 @@ public class MainWindow extends JFrame {
 	initComponents();
     }
 
-    public void initComponents() {
+    public final void initComponents() {
 	try {
 	    // Set System L&F
 	    UIManager.setLookAndFeel(
@@ -78,13 +78,17 @@ public class MainWindow extends JFrame {
     }
 
     protected void close(){
-	gcode.close();
+	gcode=null;
     }
     
     protected void open(){
-	if(gcode==null){
-	    gcode=new GCode();
+	int result=chooser.showOpenDialog(this);
+	if(result==JFileChooser.APPROVE_OPTION){
+	    try {
+		gcode=new GCode(chooser.getSelectedFile());
+	    } catch (IOException ex) {
+		Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+	    }
 	}
-	gcode.open(this);
     }
 }
